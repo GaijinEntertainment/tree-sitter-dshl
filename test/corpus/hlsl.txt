@@ -1,0 +1,213 @@
+================================================================================
+Global HLSL blocks
+================================================================================
+
+hlsl {
+  #define SHARED_CONSTANT 1
+}
+
+hlsl(ps) {
+  float4 tint(float4 color) { return color * 0.5; }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (hlsl_block
+    body: (hlsl_body
+      (hlsl_code)))
+  (hlsl_block
+    stage: (identifier)
+    body: (hlsl_body
+      (hlsl_code))))
+
+================================================================================
+Empty HLSL block
+================================================================================
+
+hlsl {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (hlsl_block))
+
+================================================================================
+HLSL block with the brace on the next line
+================================================================================
+
+hlsl(vs)
+{
+  float4 position;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (hlsl_block
+    stage: (identifier)
+    body: (hlsl_body
+      (hlsl_code))))
+
+================================================================================
+Braces in comments and strings
+================================================================================
+
+hlsl(ps) {
+  // a { brace in a line comment
+  /* a } brace in a block comment */
+  #define MESSAGE "a } brace in a string"
+  float4 main_ps() : SV_Target { return 1; }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (hlsl_block
+    stage: (identifier)
+    body: (hlsl_body
+      (hlsl_code))))
+
+================================================================================
+Conditional directives
+================================================================================
+
+shader conditional_hlsl
+{
+  hlsl(ps) {
+    ##if quality == high
+      #define SAMPLES 16
+    ##elif quality == medium
+      #define SAMPLES 8
+    ##else
+      #define SAMPLES 4
+    ##endif
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (hlsl_block
+        stage: (identifier)
+        body: (hlsl_body
+          (hlsl_if_directive
+            condition: (comparison
+              left: (identifier)
+              right: (identifier)))
+          (hlsl_code)
+          (hlsl_elif_directive
+            condition: (comparison
+              left: (identifier)
+              right: (identifier)))
+          (hlsl_code)
+          (hlsl_else_directive)
+          (hlsl_code)
+          (hlsl_endif_directive))))))
+
+================================================================================
+Directives inside nested HLSL braces
+================================================================================
+
+hlsl(cs) {
+  void main_cs()
+  {
+    ##if hardware.bindless
+      fetch_bindless();
+    ##endif
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (hlsl_block
+    stage: (identifier)
+    body: (hlsl_body
+      (hlsl_code)
+      (hlsl_if_directive
+        condition: (hardware_condition
+          feature: (identifier)))
+      (hlsl_code)
+      (hlsl_endif_directive)
+      (hlsl_code))))
+
+================================================================================
+Spaces after the directive marker
+================================================================================
+
+hlsl {
+  ## if use_fog
+    #define FOG 1
+  ##  endif
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (hlsl_block
+    body: (hlsl_body
+      (hlsl_if_directive
+        condition: (identifier))
+      (hlsl_code)
+      (hlsl_endif_directive))))
+
+================================================================================
+Bool and declare directives
+================================================================================
+
+hlsl(ps) {
+  ##bool use_detail
+  ##declare quality
+  float4 sample_detail() { return 0; }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (hlsl_block
+    stage: (identifier)
+    body: (hlsl_body
+      (hlsl_bool_directive
+        name: (identifier))
+      (hlsl_declare_directive
+        interval: (identifier))
+      (hlsl_code))))
+
+================================================================================
+Assert directive arguments
+================================================================================
+
+hlsl(ps) {
+  ##assert(index < count, "index %d is out of range", index);
+  float4 read() { return 0; }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (hlsl_block
+    stage: (identifier)
+    body: (hlsl_body
+      (hlsl_assert_directive
+        arguments: (directive_arguments))
+      (hlsl_code))))
+
+================================================================================
+Concatenation inside HLSL code
+================================================================================
+
+hlsl {
+  #define CONCAT(a, b) a##b
+  ##pragma once
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (hlsl_block
+    body: (hlsl_body
+      (hlsl_code))))

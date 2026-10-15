@@ -1,0 +1,280 @@
+================================================================================
+Include directives
+================================================================================
+
+include "shader_global.dshl"
+include_optional "project_overrides.dshl"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (include_directive
+    path: (string))
+  (include_directive
+    path: (string)))
+
+================================================================================
+Global texture and buffer declarations
+================================================================================
+
+texture scene_tex;
+buffer instance_data;
+const_buffer frame_params;
+tlas scene_tlas;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)))
+
+================================================================================
+Global numeric declarations with values
+================================================================================
+
+float exposure = 1.5;
+int max_lights = 16;
+int4 light_flags = (0, 0, 0, 1);
+float4 sun_color = float4(1, 0.9, 0.8, 1);
+float4x4 view_tm;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (vector_expression
+      component: (number)
+      component: (number)
+      component: (number)
+      component: (number)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (vector_expression
+      component: (number)
+      component: (number)
+      component: (number)
+      component: (number)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)))
+
+================================================================================
+Literal global declaration
+================================================================================
+
+literal int tile_size = 8;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number)))
+
+================================================================================
+Global array with an initializer list
+================================================================================
+
+float4 cascade_weights[4] = {0.1, 0.2, 0.3, 0.4};
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    size: (array_size
+      (number))
+    value: (initializer_list
+      (number)
+      (number)
+      (number)
+      (number))))
+
+================================================================================
+Global declarations kept referenced
+================================================================================
+
+buffer debug_counters always_referenced;
+float fog_density = 0.01 always_referenced;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number)))
+
+================================================================================
+Sampler declarations
+================================================================================
+
+sampler point_sampler;
+sampler linear_clamp {
+  filter = linear;
+  address_u = clamp;
+  mip_bias = -0.5;
+} always_referenced;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (sampler_declaration
+    name: (identifier))
+  (sampler_declaration
+    name: (identifier)
+    body: (sampler_body
+      (sampler_state
+        name: (identifier)
+        value: (identifier))
+      (sampler_state
+        name: (identifier)
+        value: (identifier))
+      (sampler_state
+        name: (identifier)
+        value: (unary_expression
+          operand: (number))))))
+
+================================================================================
+Interval declaration
+================================================================================
+
+interval quality: low < 1, medium < 2, high;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (interval_declaration
+    name: (identifier)
+    value: (interval_value
+      name: (identifier)
+      bound: (number))
+    value: (interval_value
+      name: (identifier)
+      bound: (number))
+    value: (interval_value
+      name: (identifier))))
+
+================================================================================
+Interval with signed bounds
+================================================================================
+
+interval fade_mode: fade_out < -0.5, fade_none < 0.5, fade_in always_referenced;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (interval_declaration
+    name: (identifier)
+    value: (interval_value
+      name: (identifier)
+      bound: (unary_expression
+        operand: (number)))
+    value: (interval_value
+      name: (identifier)
+      bound: (number))
+    value: (interval_value
+      name: (identifier))))
+
+================================================================================
+Interval with a macro parameter as a bound
+================================================================================
+
+macro DECLARE_LEVELS(limit)
+  interval levels: few < limit, many;
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier))
+    body: (macro_body
+      (interval_declaration
+        name: (identifier)
+        value: (interval_value
+          name: (identifier)
+          bound: (identifier))
+        value: (interval_value
+          name: (identifier))))))
+
+================================================================================
+Global bool declaration
+================================================================================
+
+bool use_fog = quality >= medium;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (comparison
+      left: (identifier)
+      right: (identifier))))
+
+================================================================================
+Assume statements
+================================================================================
+
+assume quality = high;
+assume shadow_tex = NULL;
+assume shadow_tex != NULL;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assume_statement
+    interval: (identifier)
+    value: (identifier))
+  (assume_statement
+    interval: (identifier)
+    value: (null))
+  (assume_statement
+    interval: (identifier)
+    value: (null)))
+
+================================================================================
+Assume if not assumed
+================================================================================
+
+assume_if_not_assumed quality = medium;
+assume_if_not_assumed noise_tex != NULL;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assume_statement
+    interval: (identifier)
+    value: (identifier))
+  (assume_statement
+    interval: (identifier)
+    value: (null)))

@@ -1,0 +1,592 @@
+================================================================================
+Shader with aliases
+================================================================================
+
+shader opaque_simple, opaque_simple_alt
+{
+  supports global_frame;
+  render_stage opaque;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    name: (identifier)
+    body: (statement_block
+      (supports_statement
+        block: (identifier))
+      (render_stage_statement
+        stage: (identifier)))))
+
+================================================================================
+Shader block
+================================================================================
+
+block(scene) scene_block
+{
+  local float4 offset = (0, 1, 0, 0);
+  bool use_offset = quality > low;
+  (vs) { scene_offset@f4 = offset; }
+  (ps) { immediate_dword_count = 2; }
+  supports none;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (block_declaration
+    scope: (identifier)
+    name: (identifier)
+    body: (statement_block
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (vector_expression
+          component: (number)
+          component: (number)
+          component: (number)
+          component: (number)))
+      (bool_declaration
+        name: (identifier)
+        value: (comparison
+          left: (identifier)
+          right: (identifier)))
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (identifier))))
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (immediate_dword_count_statement
+            count: (number))))
+      (supports_statement
+        block: (none)))))
+
+================================================================================
+Pipeline state statements
+================================================================================
+
+shader blended
+{
+  cull_mode = none;
+  z_write = false;
+  z_test = true;
+  z_func = less_equal;
+  blend_src = one;
+  blend_dst = isa;
+  blend_src[1] = sa;
+  blend_factor = (1, 1, 1, 0.5);
+  color_write = static write_mask;
+  stencil = true;
+  stencil_ref = 1;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (state_statement
+        state: (state_name)
+        value: (none))
+      (state_statement
+        state: (state_name)
+        value: (boolean))
+      (state_statement
+        state: (state_name)
+        value: (boolean))
+      (state_statement
+        state: (state_name)
+        value: (identifier))
+      (state_statement
+        state: (state_name)
+        value: (identifier))
+      (state_statement
+        state: (state_name)
+        value: (identifier))
+      (state_statement
+        state: (state_name)
+        index: (number)
+        value: (identifier))
+      (state_statement
+        state: (state_name)
+        value: (vector_expression
+          component: (number)
+          component: (number)
+          component: (number)
+          component: (number)))
+      (state_statement
+        state: (state_name)
+        value: (identifier))
+      (state_statement
+        state: (state_name)
+        value: (boolean))
+      (state_statement
+        state: (state_name)
+        value: (number)))))
+
+================================================================================
+Depth bias states
+================================================================================
+
+shader biased
+{
+  z_bias = depth_bias;
+  slope_z_bias = -2;
+  z_bias = 0.001;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (state_statement
+        state: (state_name)
+        value: (identifier))
+      (state_statement
+        state: (state_name)
+        value: (unary_expression
+          operand: (number)))
+      (state_statement
+        state: (state_name)
+        value: (number)))))
+
+================================================================================
+Channel declarations
+================================================================================
+
+shader with_channels
+{
+  channel float3 pos = pos;
+  channel color8 vcol = vcol;
+  channel float2 tc[0] = tc[0];
+  channel short2 tc[1] = tc[1] mul_4k;
+  channel short4n norm = norm signed_pack;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (channel_declaration
+        type: (channel_type)
+        usage: (channel_usage)
+        source: (channel_usage))
+      (channel_declaration
+        type: (channel_type)
+        usage: (channel_usage)
+        source: (channel_usage))
+      (channel_declaration
+        type: (channel_type)
+        usage: (channel_usage
+          index: (number))
+        source: (channel_usage
+          index: (number)))
+      (channel_declaration
+        type: (channel_type)
+        usage: (channel_usage
+          index: (number))
+        source: (channel_usage
+          index: (number))
+        modifier: (channel_modifier))
+      (channel_declaration
+        type: (channel_type)
+        usage: (channel_usage)
+        source: (channel_usage)
+        modifier: (channel_modifier)))))
+
+================================================================================
+Supports statements
+================================================================================
+
+shader with_blocks
+{
+  supports global_frame, scene_block;
+  supports none;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (supports_statement
+        block: (identifier)
+        block: (identifier))
+      (supports_statement
+        block: (none)))))
+
+================================================================================
+Directives
+================================================================================
+
+shader hidden
+{
+  dont_render;
+  no_ablend;
+  render_trans;
+  no_dynstcode;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (directive)
+      (directive)
+      (directive)
+      (directive))))
+
+================================================================================
+Render stage names
+================================================================================
+
+shader staged
+{
+  render_stage decal;
+  render_stage "transparent";
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (render_stage_statement
+        stage: (identifier))
+      (render_stage_statement
+        stage: (string)))))
+
+================================================================================
+Raytracing statements
+================================================================================
+
+shader ray_traced
+{
+  max_recursion = 2;
+  allow_opacity_micromaps;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (raytracing_statement
+        value: (number))
+      (raytracing_statement))))
+
+================================================================================
+Error statement
+================================================================================
+
+shader unsupported
+{
+  error("the variant is not supported");
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (error_statement
+        message: (string)))))
+
+================================================================================
+Compile statements
+================================================================================
+
+shader compiled
+{
+  compile("target_vs", "main_vs");
+  compile("target_ps", "main_ps")
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (compile_statement
+        profile: (string)
+        entry: (string))
+      (compile_statement
+        profile: (string)
+        entry: (string)))))
+
+================================================================================
+Pass statements
+================================================================================
+
+shader forward_opaque
+{
+  pass forward;
+  pass forward.opaque;
+  pass any_of(forward, forward_lowres.main);
+  subpass deferred.fill;
+  render_pass forward;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (pass_statement
+        (subpass_reference
+          pass: (identifier)))
+      (pass_statement
+        (subpass_reference
+          pass: (identifier)
+          subpass: (identifier)))
+      (pass_statement
+        (any_of
+          function: (identifier)
+          member: (subpass_reference
+            pass: (identifier))
+          member: (subpass_reference
+            pass: (identifier)
+            subpass: (identifier))))
+      (pass_statement
+        (subpass_reference
+          pass: (identifier)
+          subpass: (identifier)))
+      (pass_statement
+        (subpass_reference
+          pass: (identifier))))))
+
+================================================================================
+Static, dynamic, and local variables
+================================================================================
+
+shader parameters
+{
+  static int mode = 0;
+  dynamic float4 tint = (1, 1, 1, 1);
+  static float strength = 1 no_warnings;
+  local float4 scaled_tint = tint * 2;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (number))
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (vector_expression
+          component: (number)
+          component: (number)
+          component: (number)
+          component: (number)))
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (number))
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (binary_expression
+          left: (identifier)
+          right: (number))))))
+
+================================================================================
+Material properties
+================================================================================
+
+shader material_driven
+{
+  texture diffuse_tex = material.texture.diffuse;
+  texture mask_tex = material.texture[2] stub = (1, 1, 1, 1);
+  static float4 base_color = material.diffuse;
+  static float4 glow_color = material.emissive;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (material_property
+          texture: (material_texture)))
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (material_property
+          texture: (material_texture
+            index: (number)))
+        attribute: (variable_attribute
+          name: (identifier)
+          value: (vector_expression
+            component: (number)
+            component: (number)
+            component: (number)
+            component: (number))))
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (material_property))
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (material_property)))))
+
+================================================================================
+Shader-level intervals, bools, and assumes
+================================================================================
+
+shader variants
+{
+  static int detail = 0;
+  interval detail: detail_off < 1, detail_on;
+  bool use_detail = detail == detail_on;
+  assume quality = high;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (number))
+      (interval_declaration
+        name: (identifier)
+        value: (interval_value
+          name: (identifier)
+          bound: (number))
+        value: (interval_value
+          name: (identifier)))
+      (bool_declaration
+        name: (identifier)
+        value: (comparison
+          left: (identifier)
+          right: (identifier)))
+      (assume_statement
+        interval: (identifier)
+        value: (identifier)))))
+
+================================================================================
+If, else if, and else
+================================================================================
+
+shader branched
+{
+  if (quality == high) {
+    z_write = true;
+  } else if (quality == medium) {
+    z_write = false;
+  } else {
+    dont_render;
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (if_statement
+        condition: (comparison
+          left: (identifier)
+          right: (identifier))
+        consequence: (statement_block
+          (state_statement
+            state: (state_name)
+            value: (boolean)))
+        alternative: (else_clause
+          (if_statement
+            condition: (comparison
+              left: (identifier)
+              right: (identifier))
+            consequence: (statement_block
+              (state_statement
+                state: (state_name)
+                value: (boolean)))
+            alternative: (else_clause
+              (statement_block
+                (directive)))))))))
+
+================================================================================
+Else followed by a macro call
+================================================================================
+
+macro USE_NO_FOG(stage)
+  if (two_sided) {
+    cull_mode = none;
+  }
+endmacro
+
+shader fogged
+{
+  if (use_fog) {
+    USE_FOG(ps)
+  } else
+    USE_NO_FOG(ps)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier))
+    body: (macro_body
+      (if_statement
+        condition: (render_flag)
+        consequence: (statement_block
+          (state_statement
+            state: (state_name)
+            value: (none))))))
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (if_statement
+        condition: (identifier)
+        consequence: (statement_block
+          (macro_call
+            macro: (identifier)
+            arguments: (macro_arguments
+              (macro_argument
+                (identifier)))))
+        alternative: (else_clause
+          (macro_call
+            macro: (identifier)
+            arguments: (macro_arguments
+              (macro_argument
+                (identifier)))))))))

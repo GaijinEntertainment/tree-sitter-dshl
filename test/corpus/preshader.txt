@@ -1,0 +1,439 @@
+================================================================================
+Preshader variables with expression values
+================================================================================
+
+shader preshader_values
+{
+  (ps) {
+    scene_tex@smp2d = scene_tex;
+    exposure@f1 = exposure;
+    sun_dir@f3 = (sun_dir.x, sun_dir.y, -sun_dir.z, 0);
+    inv_size@f2 = (1.0 / get_dimensions(scene_tex, 0).x, 0, 0, 0);
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (identifier))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (identifier))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (vector_expression
+              component: (swizzle_expression
+                operand: (identifier)
+                channels: (identifier))
+              component: (swizzle_expression
+                operand: (identifier)
+                channels: (identifier))
+              component: (unary_expression
+                operand: (swizzle_expression
+                  operand: (identifier)
+                  channels: (identifier)))
+              component: (number)))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (vector_expression
+              component: (binary_expression
+                left: (number)
+                right: (swizzle_expression
+                  operand: (function_call
+                    function: (identifier)
+                    argument: (identifier)
+                    argument: (number))
+                  channels: (identifier)))
+              component: (number)
+              component: (number)
+              component: (number))))))))
+
+================================================================================
+Preshader block with a semicolon
+================================================================================
+
+shader closed_block
+{
+  (cs) {
+    exposure@f1 = exposure;
+  };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (identifier)))))))
+
+================================================================================
+Preshader variables without semicolons
+================================================================================
+
+shader loose_variables
+{
+  (ps) {
+    first@f1 = first_value
+    second@f1 = second_value;
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (identifier))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (identifier)))))))
+
+================================================================================
+Builtin matrices
+================================================================================
+
+shader transformed
+{
+  (vs) {
+    globtm@f44 = globtm;
+    view_proj@f44 = viewprojtm;
+    local_pos@f4 = world_local_pos;
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (builtin_matrix))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (builtin_matrix))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (builtin_matrix)))))))
+
+================================================================================
+Material textures with attributes
+================================================================================
+
+shader material_textures
+{
+  (ps) {
+    diffuse_tex@static = material.texture.diffuse;
+    normal_tex@static = material.texture[1] stub = (0.5, 0.5, 1, 1);
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (material_texture_reference
+              texture: (material_texture)))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (material_texture_reference
+              texture: (material_texture
+                index: (number))
+              attribute: (variable_attribute
+                name: (identifier)
+                value: (vector_expression
+                  component: (number)
+                  component: (number)
+                  component: (number)
+                  component: (number))))))))))
+
+================================================================================
+Preshader arrays
+================================================================================
+
+shader arrays
+{
+  (ps) {
+    cascade_tm@f44 = { cascade_tm_0, cascade_tm_1 };
+    cascade_params@f4[] = { cascade_params_0, cascade_params_1 };
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (initializer_list
+              (identifier)
+              (identifier)))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (initializer_list
+              (identifier)
+              (identifier))))))))
+
+================================================================================
+Registers
+================================================================================
+
+shader registers
+{
+  (vs) {
+    instance_data@buf : register(instance_data_no) hlsl {
+      StructuredBuffer<float4> instance_data@buf;
+    }
+    bones@f4[64] : register(bones_const_no);
+    weights@f4[weights_count] : register(4);
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            register: (register
+              index: (identifier))
+            declaration: (hlsl_block
+              body: (hlsl_body
+                (hlsl_code))))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            size: (number)
+            register: (register
+              index: (identifier)))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            size: (identifier)
+            register: (register
+              index: (number))))))))
+
+================================================================================
+Output struct
+================================================================================
+
+shader structured
+{
+  (ps) {
+    GBUFFER_OUTPUT@ps_output {
+      float4 albedo : albedo_target;
+      half4 normal : optional normal_target;
+    }
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            body: (preshader_struct
+              (struct_field
+                type: (primitive_type)
+                name: (identifier)
+                semantic: (identifier))
+              (struct_field
+                type: (primitive_type)
+                name: (identifier)
+                semantic: (identifier)
+                semantic: (identifier)))))))))
+
+================================================================================
+HLSL declaration of a preshader variable
+================================================================================
+
+shader with_uav
+{
+  (cs) {
+    counters@uav = counters_buf hlsl {
+      RWStructuredBuffer<uint> counters@uav;
+    };
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (identifier)
+            declaration: (hlsl_block
+              body: (hlsl_body
+                (hlsl_code)))))))))
+
+================================================================================
+Refined block tags
+================================================================================
+
+block(frame) refined_frame
+{
+  (ps) {
+    tint@f4#rb = tint;
+    view@f44#rb = view_tm;
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (block_declaration
+    scope: (identifier)
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            tag: (refined_block_tag)
+            value: (identifier))
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            tag: (refined_block_tag)
+            value: (identifier)))))))
+
+================================================================================
+Macro parameter as a type suffix
+================================================================================
+
+macro INIT_NOISE(stage, tex_type)
+  (stage) {
+    noise_tex tex_type = noise_tex;
+  }
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier)
+      (identifier))
+    body: (macro_body
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (identifier)
+            value: (identifier)))))))
+
+================================================================================
+Conditions inside a preshader block
+================================================================================
+
+shader conditional_bindings
+{
+  (ps) {
+    if (use_fog) {
+      fog_params@f4 = fog_params;
+    } else {
+      fog_params@f4 = (0, 0, 0, 0);
+    }
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (if_statement
+            condition: (identifier)
+            consequence: (statement_block
+              (preshader_variable
+                name: (identifier)
+                type: (type_suffix)
+                value: (identifier)))
+            alternative: (else_clause
+              (statement_block
+                (preshader_variable
+                  name: (identifier)
+                  type: (type_suffix)
+                  value: (vector_expression
+                    component: (number)
+                    component: (number)
+                    component: (number)
+                    component: (number)))))))))))

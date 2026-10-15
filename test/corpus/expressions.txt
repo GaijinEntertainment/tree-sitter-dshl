@@ -1,0 +1,268 @@
+================================================================================
+Multiplication binds tighter than addition
+================================================================================
+
+float first = 1 + 2 * 3;
+float second = (1 + 2) * 3;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (binary_expression
+      left: (number)
+      right: (binary_expression
+        left: (number)
+        right: (number))))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (binary_expression
+      left: (parenthesized_expression
+        (binary_expression
+          left: (number)
+          right: (number)))
+      right: (number))))
+
+================================================================================
+Left associativity
+================================================================================
+
+float divided = 8 / 2 / 2;
+float summed = 1 - 2 + 3;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (binary_expression
+      left: (binary_expression
+        left: (number)
+        right: (number))
+      right: (number)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (binary_expression
+      left: (binary_expression
+        left: (number)
+        right: (number))
+      right: (number))))
+
+================================================================================
+Unary operators
+================================================================================
+
+float negated = -exposure;
+float positive = +1;
+float negated_group = -(near + far);
+float negated_call = -max(near, far);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (unary_expression
+      operand: (identifier)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (unary_expression
+      operand: (number)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (unary_expression
+      operand: (parenthesized_expression
+        (binary_expression
+          left: (identifier)
+          right: (identifier)))))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (unary_expression
+      operand: (function_call
+        function: (identifier)
+        argument: (identifier)
+        argument: (identifier)))))
+
+================================================================================
+Swizzles
+================================================================================
+
+float red = sun_color.r;
+float height = get_dimensions(noise_tex, 0).y;
+float grouped = (near + far).x;
+float negated_channel = -sun_dir.x;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (swizzle_expression
+      operand: (identifier)
+      channels: (identifier)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (swizzle_expression
+      operand: (function_call
+        function: (identifier)
+        argument: (identifier)
+        argument: (number))
+      channels: (identifier)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (swizzle_expression
+      operand: (parenthesized_expression
+        (binary_expression
+          left: (identifier)
+          right: (identifier)))
+      channels: (identifier)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (unary_expression
+      operand: (swizzle_expression
+        operand: (identifier)
+        channels: (identifier)))))
+
+================================================================================
+Function calls
+================================================================================
+
+float clamped = max(near, min(far, 1));
+float4 viewport = get_viewport();
+float phase = time_phase(0, 0);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (function_call
+      function: (identifier)
+      argument: (identifier)
+      argument: (function_call
+        function: (identifier)
+        argument: (identifier)
+        argument: (number))))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (function_call
+      function: (identifier)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (function_call
+      function: (identifier)
+      argument: (number)
+      argument: (number))))
+
+================================================================================
+Vector expressions
+================================================================================
+
+float4 full = float4(1, 2, 3, 4);
+float4 splat = float4(1);
+float4 pair = (near, far);
+float4 triple = (near, far, 1);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (vector_expression
+      component: (number)
+      component: (number)
+      component: (number)
+      component: (number)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (vector_expression
+      component: (number)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (vector_expression
+      component: (identifier)
+      component: (identifier)))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (vector_expression
+      component: (identifier)
+      component: (identifier)
+      component: (number))))
+
+================================================================================
+Decimal and hexadecimal numbers
+================================================================================
+
+int decimal = 42;
+int hex = 0xFF;
+int suffixed = 0FFh;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number)))
+
+================================================================================
+Floating-point numbers
+================================================================================
+
+float trailing_dot = 1.;
+float leading_dot = .5;
+float exponent = 1e3;
+float negative_exponent = 2.5e-3;
+float positive_exponent = 1.5E+2;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number))
+  (variable_declaration
+    type: (variable_type)
+    name: (identifier)
+    value: (number)))

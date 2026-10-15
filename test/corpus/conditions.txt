@@ -1,0 +1,239 @@
+================================================================================
+And binds tighter than or
+================================================================================
+
+bool first = use_fog || use_sky && use_sun;
+bool second = use_fog && use_sky || use_sun;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (binary_condition
+      left: (identifier)
+      right: (binary_condition
+        left: (identifier)
+        right: (identifier))))
+  (bool_declaration
+    name: (identifier)
+    value: (binary_condition
+      left: (binary_condition
+        left: (identifier)
+        right: (identifier))
+      right: (identifier))))
+
+================================================================================
+Parentheses
+================================================================================
+
+bool grouped = (use_fog || use_sky) && use_sun;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (binary_condition
+      left: (parenthesized_condition
+        (binary_condition
+          left: (identifier)
+          right: (identifier)))
+      right: (identifier))))
+
+================================================================================
+Not
+================================================================================
+
+bool no_fog = !use_fog;
+bool neither = !(use_fog || use_sky);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (not_condition
+      operand: (identifier)))
+  (bool_declaration
+    name: (identifier)
+    value: (not_condition
+      operand: (parenthesized_condition
+        (binary_condition
+          left: (identifier)
+          right: (identifier))))))
+
+================================================================================
+Interval comparisons
+================================================================================
+
+bool comparisons = quality == high && quality != low && quality <> medium && quality < high && quality <= high && quality > low && quality >= low;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (binary_condition
+      left: (binary_condition
+        left: (binary_condition
+          left: (binary_condition
+            left: (binary_condition
+              left: (binary_condition
+                left: (comparison
+                  left: (identifier)
+                  right: (identifier))
+                right: (comparison
+                  left: (identifier)
+                  right: (identifier)))
+              right: (comparison
+                left: (identifier)
+                right: (identifier)))
+            right: (comparison
+              left: (identifier)
+              right: (identifier)))
+          right: (comparison
+            left: (identifier)
+            right: (identifier)))
+        right: (comparison
+          left: (identifier)
+          right: (identifier)))
+      right: (comparison
+        left: (identifier)
+        right: (identifier)))))
+
+================================================================================
+Null comparisons
+================================================================================
+
+bool has_noise = noise_tex != NULL;
+bool no_noise = noise_tex == NULL;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (comparison
+      left: (identifier)
+      right: (null)))
+  (bool_declaration
+    name: (identifier)
+    value: (comparison
+      left: (identifier)
+      right: (null))))
+
+================================================================================
+Shader comparison
+================================================================================
+
+bool is_alt = shader == alt_shader || shader != base_shader;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (binary_condition
+      left: (shader_condition
+        right: (identifier))
+      right: (shader_condition
+        right: (identifier)))))
+
+================================================================================
+Hardware features
+================================================================================
+
+bool modern = hardware.fsh_6_0 && hardware.bindless && !hardware.mesh;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (binary_condition
+      left: (binary_condition
+        left: (hardware_condition
+          feature: (identifier))
+        right: (hardware_condition
+          feature: (identifier)))
+      right: (not_condition
+        operand: (hardware_condition
+          feature: (identifier))))))
+
+================================================================================
+Maybe
+================================================================================
+
+bool detailed = maybe(use_detail);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (maybe_condition
+      variable: (identifier))))
+
+================================================================================
+Two-sided rendering flags
+================================================================================
+
+bool sided = two_sided || real_two_sided;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (binary_condition
+      left: (render_flag)
+      right: (render_flag))))
+
+================================================================================
+Boolean literals
+================================================================================
+
+bool always = true;
+bool never = false;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (bool_declaration
+    name: (identifier)
+    value: (boolean))
+  (bool_declaration
+    name: (identifier)
+    value: (boolean)))
+
+================================================================================
+Macro calls in conditions
+================================================================================
+
+shader guarded
+{
+  if (FOG_ENABLED() && !IS_DEFINED(fog_guard)) {
+    dont_render;
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (if_statement
+        condition: (binary_condition
+          left: (macro_call
+            macro: (identifier)
+            arguments: (macro_arguments))
+          right: (not_condition
+            operand: (macro_call
+              macro: (identifier)
+              arguments: (macro_arguments
+                (macro_argument
+                  (identifier))))))
+        consequence: (statement_block
+          (directive))))))

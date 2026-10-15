@@ -1,0 +1,40 @@
+include "shader_global.dshl"
+
+texture frame_tex;
+float4 world_view_pos = (0, 0, 0, 1) always_referenced;
+int quality = 1;
+interval quality: low < 1, medium < 2, high;
+sampler point_clamp { filter = point; address_u = clamp; };
+bool use_fog = quality >= medium && !hardware.fsh_5_0;
+
+macro USE_FOO(stage)
+  (stage) {
+    foo_tex@smp2d = frame_tex;
+    foo_pos@f4 = (world_view_pos.x * 2, -world_view_pos.y, 1, 0);
+  }
+  hlsl(stage) {
+    float4 foo(float2 tc) { return tex2D(foo_tex, tc); }
+  ##if use_fog
+    #define FOO_FOG 1
+  ##endif
+  }
+endmacro
+
+shader foo_shader, foo_shader_alt
+{
+  supports global_frame;
+  z_write = false;
+  cull_mode = none;
+  channel float3 pos = pos;
+  static int foo_mode = 0;
+  if (shader == foo_shader_alt || maybe(use_fog)) {
+    USE_FOO(ps)
+  } else {
+    dont_render;
+  }
+  hlsl(ps) {
+    ##assert(foo_mode < 4, "mode %d", foo_mode);
+    float4 main_ps() : SV_Target { return foo(0); }
+  }
+  compile("target_ps", "main_ps");
+}

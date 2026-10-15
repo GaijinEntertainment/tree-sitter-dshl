@@ -1,0 +1,294 @@
+================================================================================
+Render pass with attachment lists
+================================================================================
+
+render_pass forward
+{
+  color(scene = argb16f, velocity = rg16f);
+  depth(scene_depth = d32);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (render_pass_declaration
+    name: (identifier)
+    body: (render_pass_body
+      (attachment_list
+        kind: (identifier)
+        attachment: (attachment
+          name: (identifier)
+          format: (identifier))
+        attachment: (attachment
+          name: (identifier)
+          format: (identifier)))
+      (attachment_list
+        kind: (identifier)
+        attachment: (attachment
+          name: (identifier)
+          format: (identifier))))))
+
+================================================================================
+Multisampled attachments with a resolve
+================================================================================
+
+render_pass forward_msaa
+{
+  color(scene_ms = argb8 x4 resolve(scene = argb8));
+  depth(depth_ms = d24 x4 resolve(depth_resolved));
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (render_pass_declaration
+    name: (identifier)
+    body: (render_pass_body
+      (attachment_list
+        kind: (identifier)
+        attachment: (attachment
+          name: (identifier)
+          format: (identifier)
+          samples: (identifier)
+          resolve: (resolve
+            function: (identifier)
+            target: (identifier)
+            format: (identifier))))
+      (attachment_list
+        kind: (identifier)
+        attachment: (attachment
+          name: (identifier)
+          format: (identifier)
+          samples: (identifier)
+          resolve: (resolve
+            function: (identifier)
+            target: (identifier)))))))
+
+================================================================================
+Multi render pass with targets and subpasses
+================================================================================
+
+multi_render_pass deferred
+{
+  allow_split;
+  framebuffer(deferred_fb);
+  target gbuf0;
+  target result = argb8;
+  target scene = argb16f x4 resolve(scene_resolved);
+  transient target scratch = r32f;
+  subpass prepass;
+  subpass fill
+  {
+    color(gbuf0, clear result);
+    depth(zbuf);
+  }
+  phase compose
+  {
+    read(gbuf0);
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (render_pass_declaration
+    name: (identifier)
+    body: (render_pass_body
+      (render_pass_flag
+        name: (identifier))
+      (attachment_list
+        kind: (identifier)
+        attachment: (attachment
+          name: (identifier)))
+      (render_target_declaration
+        kind: (identifier)
+        name: (identifier))
+      (render_target_declaration
+        kind: (identifier)
+        name: (identifier)
+        format: (identifier))
+      (render_target_declaration
+        kind: (identifier)
+        name: (identifier)
+        format: (identifier)
+        samples: (identifier)
+        resolve: (resolve
+          function: (identifier)
+          target: (identifier)))
+      (render_target_declaration
+        qualifier: (identifier)
+        kind: (identifier)
+        name: (identifier)
+        format: (identifier))
+      (subpass_declaration
+        name: (identifier))
+      (subpass_declaration
+        name: (identifier)
+        body: (subpass_body
+          (attachment_list
+            kind: (identifier)
+            attachment: (attachment
+              name: (identifier))
+            attachment: (attachment
+              qualifier: (identifier)
+              name: (identifier)))
+          (attachment_list
+            kind: (identifier)
+            attachment: (attachment
+              name: (identifier)))))
+      (subpass_declaration
+        kind: (identifier)
+        name: (identifier)
+        body: (subpass_body
+          (attachment_list
+            kind: (identifier)
+            attachment: (attachment
+              name: (identifier))))))))
+
+================================================================================
+Conditions inside render passes and subpasses
+================================================================================
+
+multi_render_pass conditional
+{
+  target zbuf;
+  if (hardware.mesh) { target zbuf_value; }
+  subpass resolve
+  {
+    color(result);
+    if (hardware.mesh) { read(gbuf0, zbuf_value); }
+    else { read(gbuf0, zbuf); }
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (render_pass_declaration
+    name: (identifier)
+    body: (render_pass_body
+      (render_target_declaration
+        kind: (identifier)
+        name: (identifier))
+      (if_statement
+        condition: (hardware_condition
+          feature: (identifier))
+        consequence: (render_pass_body
+          (render_target_declaration
+            kind: (identifier)
+            name: (identifier))))
+      (subpass_declaration
+        name: (identifier)
+        body: (subpass_body
+          (attachment_list
+            kind: (identifier)
+            attachment: (attachment
+              name: (identifier)))
+          (if_statement
+            condition: (hardware_condition
+              feature: (identifier))
+            consequence: (subpass_body
+              (attachment_list
+                kind: (identifier)
+                attachment: (attachment
+                  name: (identifier))
+                attachment: (attachment
+                  name: (identifier))))
+            alternative: (else_clause
+              (subpass_body
+                (attachment_list
+                  kind: (identifier)
+                  attachment: (attachment
+                    name: (identifier))
+                  attachment: (attachment
+                    name: (identifier)))))))))))
+
+================================================================================
+Render pass groups
+================================================================================
+
+subpass forward_any = any_of(forward, forward_lowres);
+render_pass deferred_any = any_of(deferred.fill, deferred_lowres.fill);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (render_pass_group_declaration
+    name: (identifier)
+    value: (any_of
+      function: (identifier)
+      member: (subpass_reference
+        pass: (identifier))
+      member: (subpass_reference
+        pass: (identifier))))
+  (render_pass_group_declaration
+    name: (identifier)
+    value: (any_of
+      function: (identifier)
+      member: (subpass_reference
+        pass: (identifier)
+        subpass: (identifier))
+      member: (subpass_reference
+        pass: (identifier)
+        subpass: (identifier)))))
+
+================================================================================
+Framebuffer layout with targets
+================================================================================
+
+framebuffer_layout forward_fb_hdr16
+{
+  scene = argb16f;
+  velocity = rg16f;
+  zbuf = d32 x4;
+  if (hardware.mesh) {
+    shading_rate = r8;
+  } else {
+    shading_rate = r16f;
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (framebuffer_layout_declaration
+    name: (identifier)
+    body: (framebuffer_layout_body
+      (framebuffer_target
+        name: (identifier)
+        format: (identifier))
+      (framebuffer_target
+        name: (identifier)
+        format: (identifier))
+      (framebuffer_target
+        name: (identifier)
+        format: (identifier)
+        samples: (identifier))
+      (if_statement
+        condition: (hardware_condition
+          feature: (identifier))
+        consequence: (framebuffer_layout_body
+          (framebuffer_target
+            name: (identifier)
+            format: (identifier)))
+        alternative: (else_clause
+          (framebuffer_layout_body
+            (framebuffer_target
+              name: (identifier)
+              format: (identifier))))))))
+
+================================================================================
+Framebuffer layout from a list of layouts
+================================================================================
+
+framebuffer_layout forward_fb = any_of(forward_fb_hdr16, forward_fb_hdr11);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (framebuffer_layout_declaration
+    name: (identifier)
+    value: (framebuffer_layout_any_of
+      function: (identifier)
+      member: (identifier)
+      member: (identifier))))

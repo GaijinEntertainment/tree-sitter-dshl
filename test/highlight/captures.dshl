@@ -1,0 +1,207 @@
+include "shader_global.dshl"
+// <- keyword.import
+//      ^ string.special.path
+include_optional "extra.dshl" // optional
+// <- keyword.import
+//                            ^ comment
+
+texture frame_tex always_referenced;
+// <- type.builtin
+//      ^ variable
+//                ^ keyword.modifier
+//                                 ^ punctuation.delimiter
+literal float4 world_pos = float4(0, 1.5, 0x1F, 1e3);
+// <- keyword.modifier
+//      ^ type.builtin
+//             ^ variable
+//                       ^ operator
+//                         ^ type.builtin
+//                               ^ punctuation.bracket
+//                                ^ number
+//                                   ^ number.float
+//                                        ^ number
+//                                              ^ number.float
+int quality = 1;
+// <- type.builtin
+interval quality: low < 1, high;
+// <- keyword.type
+//       ^ type
+//                ^ constant
+//                    ^ operator
+//                       ^ punctuation.delimiter
+//                         ^ constant
+sampler point_clamp { filter = point; } always_referenced;
+// <- keyword.type
+//      ^ variable
+//                  ^ punctuation.bracket
+//                    ^ property
+bool use_fog = quality >= high && !hardware.fsh_5_0 || maybe(fog_on) || two_sided;
+// <- type.builtin
+//                     ^ operator
+//                        ^ constant
+//                             ^ operator
+//                                ^ operator
+//                                 ^ variable.builtin
+//                                         ^ punctuation.delimiter
+//                                          ^ constant.builtin
+//                                                     ^ function.builtin
+//                                                                      ^ constant.builtin
+assume quality = high;
+// <- keyword
+//               ^ constant
+assume_if_not_assumed frame_tex != NULL;
+// <- keyword
+//                                 ^ constant.builtin
+int layers = MAX_LAYERS;
+//           ^ constant
+
+macro USE_FOO(stage, code)
+// <- keyword.directive.define
+//    ^ function.macro
+//            ^ variable.parameter
+  (stage) {
+// ^ attribute
+    foo_tex@smp2d#rb = frame_tex;
+//  ^ variable.member
+//         ^ type
+//               ^ attribute
+    foo_pos@f4 = (world_pos.x * 2, -world_pos.y / 4, 1, 0);
+//                          ^ variable.member
+//                            ^ operator
+//                                 ^ operator
+//                                              ^ operator
+    foo_mtx@f44 = globtm;
+//                ^ variable.builtin
+    foo_any tex_or_sampler = frame_tex;
+//          ^ variable.parameter
+    foo_time@f1 = time_phase(1, 0) + FOO_SCALE(2);
+//                ^ function.builtin
+//                                 ^ operator
+//                                   ^ function.call
+    foo_out@uav : register(slot);
+//              ^ punctuation.delimiter
+//                ^ keyword
+    foo_struct@buf {
+      float3 color : SV_Target0;
+//    ^ type.builtin
+//           ^ variable.member
+//                   ^ attribute
+      Light lights : TEXCOORD1;
+//    ^ type
+    }
+  }
+  code
+//^ variable.parameter
+endmacro
+// <- keyword.directive.define
+
+define_macro_if_not_defined USE_BAR()
+// <- keyword.directive.define
+  error("not supported");
+//^ keyword.exception
+//      ^ string
+endmacro
+
+block(frame) global_frame
+// <- keyword.type
+//    ^ attribute
+//           ^ type
+{
+  local float4 tmp = 0;
+//^ keyword.modifier
+}
+
+render_pass forward
+// <- keyword.type
+//          ^ type
+{
+  allow_split;
+//^ keyword
+  transient color scratch = rgba8 x4;
+//^ keyword.modifier
+//          ^ keyword
+//                          ^ type.builtin
+//                                ^ number
+  color(scene = argb16f resolve(resolved = argb16f));
+//^ keyword
+//                      ^ function.builtin
+  depth(transient depth_ms = d32);
+//      ^ keyword.modifier
+  subpass fill { color(scene); }
+//^ keyword.type
+//        ^ type
+}
+
+subpass forward_any = any_of(forward, forward_lowres);
+//      ^ type
+//                    ^ function.builtin
+//      ^ type
+
+framebuffer_layout forward_fb
+// <- keyword.type
+//                 ^ type
+{
+  scene = argb16f;
+//^ variable.member
+}
+framebuffer_layout forward_fb_any = any_of(forward_fb, forward_fb_hdr);
+//                                                     ^ type
+
+shader foo_shader, foo_alt
+// <- keyword.type
+//     ^ type
+//                 ^ type
+{
+  supports global_frame, none;
+//^ keyword
+//         ^ type
+//                       ^ constant.builtin
+  pass forward_any;
+//^ keyword
+//     ^ type
+  pass forward.fill;
+//             ^ type
+  z_write = static false;
+//^ property
+//          ^ keyword.modifier
+//                 ^ boolean
+  channel float3 pos = pos signed_pack;
+//^ keyword.type
+//        ^ type.builtin
+//               ^ constant.builtin
+//                         ^ attribute
+  dynamic texture tex = material.texture[0];
+//^ keyword.modifier
+//                      ^ variable.builtin
+//                               ^ variable.member
+  static float4 color = material.diffuse no_warnings;
+//                               ^ variable.member
+//                                       ^ keyword.modifier
+  if (shader == foo_alt) {
+//^ keyword.conditional
+//    ^ variable.builtin
+//              ^ type
+    USE_FOO(ps, dont_render;)
+//  ^ function.macro
+  } else {
+//  ^ keyword.conditional
+    no_dynstcode;
+//  ^ keyword
+  }
+  render_stage opaque;
+//^ keyword
+//             ^ attribute
+  max_recursion = 2;
+//^ keyword
+  (cs) { immediate_dword_count = 4; }
+//       ^ keyword
+  hlsl(ps) {
+//^ keyword
+//     ^ attribute
+    float4 main_ps() : SV_Target { return 0; }
+  ##if use_fog }
+//^ keyword.directive
+//     ^ variable
+  compile("target_ps", "main_ps");
+//^ keyword
+}

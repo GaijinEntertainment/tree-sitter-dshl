@@ -1,0 +1,56 @@
+// Declares the fog inputs.
+macro USE_FOG(stage)
+//    ^ definition.macro
+  (stage) {
+    fog_color@f4 = fog_color;
+//  ^ definition.field
+  }
+endmacro
+
+float4 fog_color = (1, 1, 1, 1);
+//     ^ definition.constant
+literal int fog_mode = 0;
+//          ^ definition.constant
+sampler fog_sampler;
+//      ^ definition.constant
+bool use_fog = fog_mode == on;
+//   ^ definition.constant
+interval fog_mode: off < 1, on;
+//       ^ definition.enum
+
+block(frame) global_frame
+//           ^ definition.interface
+{
+  local float4 tmp = 0;
+}
+
+render_pass forward
+//          ^ definition.class
+{
+  color(scene = argb16f);
+}
+subpass forward_any = any_of(forward, forward_lowres);
+//      ^ definition.class
+framebuffer_layout forward_fb
+//                 ^ definition.class
+{
+  scene = argb16f;
+}
+
+// The fog pass.
+shader fog_shader, fog_alt
+//     ^ definition.class
+//                 ^ definition.class
+{
+  supports global_frame;
+//         ^ reference.implementation
+  pass forward_any;
+//     ^ reference.class
+  static int fog_quality = 1;
+//           ^ definition.constant
+  if (shader == fog_alt) {
+//              ^ reference.class
+    USE_FOG(ps)
+//  ^ reference.call
+  }
+}

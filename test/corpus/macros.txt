@@ -1,0 +1,363 @@
+================================================================================
+Macro with a statement body
+================================================================================
+
+macro USE_TINT(stage)
+  (stage) {
+    tint@f4 = tint;
+  }
+  hlsl(stage) {
+    #define HAS_TINT 1
+  }
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier))
+    body: (macro_body
+      (preshader_block
+        stage: (identifier)
+        body: (statement_block
+          (preshader_variable
+            name: (identifier)
+            type: (type_suffix)
+            value: (identifier))))
+      (hlsl_block
+        stage: (identifier)
+        body: (hlsl_body
+          (hlsl_code))))))
+
+================================================================================
+Macro without parameters
+================================================================================
+
+macro INIT_GLOBALS()
+  texture noise_tex;
+  float noise_scale = 1;
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters)
+    body: (macro_body
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier))
+      (variable_declaration
+        type: (variable_type)
+        name: (identifier)
+        value: (number)))))
+
+================================================================================
+Empty macro defined only once
+================================================================================
+
+define_macro_if_not_defined USE_EXTRA(stage)
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier))))
+
+================================================================================
+Macros with condition bodies
+================================================================================
+
+macro FOG_ENABLED()
+  use_fog && quality > low
+endmacro
+
+macro LIBRARY_PRESENT()
+  true
+endmacro
+
+macro NOISE_PRESENT()
+  noise_tex != NULL
+endmacro
+
+macro FEATURE_PRESENT()
+  hardware.fsh_6_0
+endmacro
+
+macro IS_DEFINED(value)
+  (maybe(value))
+endmacro
+
+macro IS_NOT_DEFINED(value)
+  !maybe(value)
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters)
+    body: (macro_body
+      (binary_condition
+        left: (identifier)
+        right: (comparison
+          left: (identifier)
+          right: (identifier)))))
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters)
+    body: (macro_body
+      (boolean)))
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters)
+    body: (macro_body
+      (comparison
+        left: (identifier)
+        right: (null))))
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters)
+    body: (macro_body
+      (hardware_condition
+        feature: (identifier))))
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier))
+    body: (macro_body
+      (parenthesized_condition
+        (maybe_condition
+          variable: (identifier)))))
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier))
+    body: (macro_body
+      (not_condition
+        operand: (maybe_condition
+          variable: (identifier))))))
+
+================================================================================
+Macros that open and close a block
+================================================================================
+
+macro OPEN_GUARD(name)
+  if (!maybe(name)) {
+    bool name = true;
+endmacro
+
+macro CLOSE_GUARD()
+  }
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier))
+    body: (macro_fragment))
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters)
+    body: (macro_fragment)))
+
+================================================================================
+Macro that gives a comma-separated list
+================================================================================
+
+macro CASCADE_VALUES()
+  cascade_0,
+  cascade_1
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters)
+    body: (macro_fragment)))
+
+================================================================================
+Parameters used as statements
+================================================================================
+
+macro WRAP(code, tail)
+  if (use_fog) {
+    code
+  }
+  tail;
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier)
+      (identifier))
+    body: (macro_body
+      (if_statement
+        condition: (identifier)
+        consequence: (statement_block
+          (parameter_statement
+            parameter: (identifier))))
+      (parameter_statement
+        parameter: (identifier)))))
+
+================================================================================
+Macro calls with and without semicolons
+================================================================================
+
+shader calls
+{
+  USE_TINT(ps)
+  USE_TINT(vs);
+  NO_ARGUMENTS()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (macro_call
+        macro: (identifier)
+        arguments: (macro_arguments
+          (macro_argument
+            (identifier))))
+      (macro_call
+        macro: (identifier)
+        arguments: (macro_arguments
+          (macro_argument
+            (identifier))))
+      (macro_call
+        macro: (identifier)
+        arguments: (macro_arguments)))))
+
+================================================================================
+Macro arguments with nested parentheses
+================================================================================
+
+shader nested_arguments
+{
+  INIT_SAMPLER(ps, float4(1, 0, 0, 1), (a + b) * 2, (c, (d)))
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (macro_call
+        macro: (identifier)
+        arguments: (macro_arguments
+          (macro_argument
+            (identifier))
+          (macro_argument
+            (identifier)
+            (number)
+            (number)
+            (number)
+            (number))
+          (macro_argument
+            (identifier)
+            (identifier)
+            (number))
+          (macro_argument
+            (identifier)
+            (identifier)))))))
+
+================================================================================
+Macro arguments with keywords, strings, and type suffixes
+================================================================================
+
+shader mixed_arguments
+{
+  DECLARE(texture, noise_tex, "label", @smp2d, -1.5)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (macro_call
+        macro: (identifier)
+        arguments: (macro_arguments
+          (macro_argument
+            (identifier))
+          (macro_argument
+            (identifier))
+          (macro_argument
+            (string))
+          (macro_argument
+            (type_suffix))
+          (macro_argument
+            (number)))))))
+
+================================================================================
+Concatenation in macro arguments
+================================================================================
+
+macro OPEN_STAGE_GUARD(name, stage)
+  OPEN_GUARD(name ## stage)
+endmacro
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    name: (identifier)
+    parameters: (macro_parameters
+      (identifier)
+      (identifier))
+    body: (macro_body
+      (macro_call
+        macro: (identifier)
+        arguments: (macro_arguments
+          (macro_argument
+            (identifier)
+            (token_concatenation)
+            (identifier)))))))
+
+================================================================================
+HLSL block in a macro argument
+================================================================================
+
+shader hlsl_argument
+{
+  WITH_HLSL(
+    hlsl {
+      #define FROM_ARGUMENT 1
+    }
+  )
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (shader_declaration
+    name: (identifier)
+    body: (statement_block
+      (macro_call
+        macro: (identifier)
+        arguments: (macro_arguments
+          (macro_argument
+            (hlsl_block
+              body: (hlsl_body
+                (hlsl_code)))))))))
