@@ -1,6 +1,6 @@
 LANGUAGE_NAME := tree-sitter-dshl
 HOMEPAGE_URL := https://github.com/GaijinEntertainment/tree-sitter-dshl
-VERSION := 0.1.0
+VERSION := 1.0.0
 DESCRIPTION := Dagor Shader Language grammar for tree-sitter
 
 # repository
